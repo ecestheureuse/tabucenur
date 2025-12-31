@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎄 tabucenur </title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", sans-serif;
+      background: linear-gradient(180deg, #e0bad3, #5b0c23);
+      color: #fffaf0;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 30px auto;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .scoreboard {
+      display: flex;
+      justify-content: space-around;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .timer {
+      font-size: 26px;
+      margin: 10px 0 20px;
+    }
+
+    .card {
+      background: #5b0c23;
+      color: #ecb3c6;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .main-word {
+      font-size: 34px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      font-size: 18px;
+      margin: 4px 0;
+    }
+
+    button {
+      background: #5b0c23;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 6px;
+    }
+
+    button:hover {
+      background: #2e8b57;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    footer {
+      margin: 20px 0;
+      opacity: 0.8;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🎄 tabucenur </h1>
+
+  <div class="container">
+    <div class="scoreboard">
+      <div> şişeye basan ve devamsızlık: <span id="scoreA">0</span></div>
+      <div> yumoşlar: <span id="scoreB">0</span></div>
+    </div>
+
+    <div class="timer">⏱️ Süre: <span id="time">60</span>s</div>
+
+    <div class="card">
+      <div class="main-word" id="word">takımlara bol şanslar dileriz</div>
+      <ul id="tabooList"></ul>
+    </div>
+
+    <button id="startBtn">▶️ Round Başlat</button><br>
+    <button id="correctBtn">✅ Doğru</button>
+    <button id="tabooBtn">🚫 Tabu</button>
+    <button id="passBtn">⏭️ Pas Geç (<span id="passCount">0</span>/3)</button>
+    <button id="switchBtn">🔄 Takım Değiştir</button>
+  </div>
+
+  <footer> umarım beğenmişsinizdir! 🫶🩷 </footer>
+
+  <script>
+    console.log("JS loaded successfully");
+
+    const words = [
+{ word: "DÜĞÜN", taboo: ["Gelin", "Damat", "Misafir", "Yüzük", "Evlenmek"] },
+{ word: "KÖPÜK", taboo: ["Banyo", "Deniz", "Türk kahvesi", "Sabun", "Baloncuk"] },
+{ word: "YILMAZ GÜNEY", taboo: ["Yol", "Çirkin Kral", "Yönetmen", "Oyuncu", "Atıf Yılmaz"] },
+{ word: "MÜNASİP", taboo: ["Hoş", "Yerinde olmak", "Beğenilen", "Uygun", "Düzgün"] },
+{ word: "MEŞGALE", taboo: ["Hobi", "Edinmek", "Uğraş", "Oyalanmak", "Meşgul"] },
+{ word: "HARP AKADEMİSİ", taboo: ["Yetiştirmek", "Okul", "TSK", "Asker", "Atatürk"] },
+{ word: "MİNYON", taboo: ["Küçük", "Film", "Ufak tefek", "Sempatik", "İnce"] },
+{ word: "CESET", taboo: ["Adli tıp", "Ölü", "Cinayet", "Katil", "Otopsi"] },
+{ word: "SURE", taboo: ["Kur'an", "Okumak", "Ayet", "Dua", "Allah"] },
+{ word: "FOTOROMAN", taboo: ["Dergi", "Fotoğraf", "Gazete", "Hikaye", "Sürekli"] },
+{ word: "ERIC CARTMAN", taboo: ["Dalgacı", "South Park", "Şişko", "Karakter", "Cahil"] },
+{ word: "MAKAS", taboo: ["Kağıt", "Kesmek", "Kumaş", "Terzi", "Taş"] },
+{ word: "SORUMLULUK", taboo: ["Görev", "Uymak", "Üstlenmek", "Sahip", "Zorunluluk"] },
+{ word: "BARDAK", taboo: ["Su", "İçmek", "Cam", "İnce belli", "Kadeh"] },
+{ word: "YABA", taboo: ["Tahta", "Harman", "Savurmak", "Çatal", "Tarım"] },
+{ word: "ATMOSFER", taboo: ["Hava", "Gaz", "Uzay", "Dünya", "Tabaka"] },
+{ word: "KAYIRMAK", taboo: ["Haksızlık", "Sağlamak", "Ayırmak", "Öncelik", "Etmek"] },
+{ word: "KAZIK", taboo: ["Ağaç", "Atmak", "Tahta", "Kahverengi", "Menteşe"] },
+{ word: "NEVŞEHİR", taboo: ["Kapadokya", "İl", "Peri bacası", "Anadolu", "Göreme"] },
+{ word: "PENALTI", taboo: ["Skor", "Futbol", "Gol", "Faul", "Düdük"] },
+{ word: "ANTİPATİK", taboo: ["Soğuk", "Sempatik", "Huysuz", "Gıcık", "Geçimsiz"] },
+{ word: "SULUK", taboo: ["Su kabı", "Çocuk", "Okul", "İçmek", "Pipet"] },
+{ word: "HALÜSİNASYON", taboo: ["İlüzyon", "Hayal", "Görmek", "Gerçek", "Serap"] },
+{ word: "NAZAR BONCUĞU", taboo: ["Mavi", "Değmek", "Göz", "Çocuk", "Takmak"] },
+{ word: "GAMZE", taboo: ["Vitamin", "Çukur", "Çene", "Yanak", "Bakış"] },
+{ word: "HESAP", taboo: ["Makine", "Ekonomi", "Matematik", "Yapmak", "Almak"] },
+{ word: "SEVGİLİLER GÜNÜ", taboo: ["14 Şubat", "Aşk", "Hediye", "Gül", "Çiçek"] },
+{ word: "BARUT", taboo: ["Koymak", "Silah", "Ateş", "Patlamak", "Fıçı"] },
+{ word: "ÖZGÜRLÜK HEYKELİ", taboo: ["Anıt", "Amerika", "Simge", "New York", "Kule"] },
+{ word: "MEZBAHA", taboo: ["Koyun", "Hayvan", "İnek", "Kesmek", "Dana"] },
+{ word: "KRAMPON", taboo: ["Kaleci", "Futbolcu", "Top", "Spor ayakkabı", "Çivili"] },
+{ word: "LEĞEN", taboo: ["Hamur", "Kap", "Yoğurmak", "Saklamak", "İç"] },
+{ word: "ABAJUR", taboo: ["Karanlık", "Elektrik", "Işık", "Lamba", "Gece"] },
+{ word: "HİPOTENÜS", taboo: ["Üçgen", "Kenar", "Dik", "Açı", "Doksan"] },
+{ word: "POS BIYIK", taboo: ["Sakal", "Uzun", "Erkek", "Gül", "Yüz"] },
+{ word: "SOMON", taboo: ["Füme", "Et", "Balık", "Renk", "Yemek"] },
+{ word: "NİKOLA TESLA", taboo: ["Bilim adamı", "Edison", "Elektrik", "Fizikçi", "Magnetik alan"] },
+{ word: "SİCİL", taboo: ["Kayıt", "Kütük", "Kağıt", "Temiz", "Bakmak"] },
+{ word: "TÜREV", taboo: ["İntegral", "Oluşmak", "Almak", "Hız", "Eğim"] },
+{ word: "ARGO", taboo: ["Küfür", "Konuşmak", "Kötü", "Kaba", "Laf"] },
+{ word: "FRAMBUAZ", taboo: ["Meyve", "Pasta", "Pembe", "Boğaz", "Ahududu"] },
+{ word: "KOLON", taboo: ["İnşaat", "Bina", "Beton", "Yapı", "Taşımak"] },
+{ word: "ENERJİ", taboo: ["Kütle", "Potansiyel", "Kuvvet", "Kinetik", "Vermek"] },
+{ word: "BAĞLAMA", taboo: ["Müzik aleti", "Çalmak", "Türkü", "Alevi", "Saz"] },
+{ word: "İMAM BAYILDI", taboo: ["Yemek", "Patlıcan", "Yemek", "Sarımsak", "Kıyma"] },
+{ word: "ESKRİM", taboo: ["Yapmak", "Spor", "Silah", "Kılıç", "Stratejik"] },
+{ word: "İZMARİT", taboo: ["Zararlı", "Sigara", "Gri", "Kül", "Akciğer"] },
+{ word: "KAKTÜS", taboo: ["Dikenli", "Çöl", "Kurak", "Su", "Yeşil"] },
+{ word: "HAMAK", taboo: ["Yatak", "Sallanmak", "Salıncak", "Yatmak", "Ağ"] },
+{ word: "RİMEL", taboo: ["Kadın", "Makyaj", "Ağlamak", "Sürmek", "Akmak"] },
+{ word: "YELPAZE", taboo: ["Serinlemek", "Sallamak", "Taşımak", "Ferah", "Hava"] },
+{ word: "ZAHMET", taboo: ["Yorgunluk", "Sıkıntı", "Olmak", "Vermek", "Güçlük"] },
+{ word: "ÇEVREYOLU", taboo: ["Araba", "Gitmek", "Otoban", "Sürmek", "Ana"] },
+{ word: "MEFRUŞAT", taboo: ["Yorgan", "Perde", "Tül", "Tuhafiye", "Çarşaf"] },
+{ word: "BALATA", taboo: ["Durmak", "Fren", "Araba", "Disk", "Tekerlek"] },
+{ word: "IŞIK", taboo: ["Ampul", "Görmek", "Parlak", "Şavk", "Mum"] },
+{ word: "OSLO", taboo: ["Norveç", "Başkent", "Ülke", "Şehir", "İsveç"] },
+{ word: "ANAHTAR", taboo: ["Çilingir", "Kapı", "Kilit", "Unutmak", "Açmak"] },
+{ word: "NANE", taboo: ["Kuru", "Yeşil", "Bitki", "Ferah", "Sakız"] },
+{ word: "SEYİRCİ", taboo: ["Televizyon", "İzlemek", "Bakmak", "Eğlenmek", "Kalkmak"] },
+{ word: "ŞENAY DÜDEK", taboo: ["İzmir", "Gazeteci", "Köşe yazarı", "Magazin", "Dobra dobra"] },
+{ word: "MİKROSKOP", taboo: ["Büyüteç", "İncelemek", "Yakınlaştırmak", "Hücre", "Zar"] },
+{ word: "ARABA", taboo: ["Ulaşım", "Araç", "Hız", "Fren", "Yol"] },
+{ word: "KAFATASI", taboo: ["Beyin", "Saç", "Kemik", "Kazı", "İç"] },
+{ word: "STETESKOP", taboo: ["Kalp", "Dinlemek", "İç", "Doktor", "Hasta"] },
+{ word: "KARYOLA", taboo: ["Yatak", "Ranza", "Uyumak", "Eşya", "Mobilya"] },
+{ word: "TURİZM", taboo: ["Tatil", "Gezmek", "Otel", "Şirket", "Tur"] },
+{ word: "AĞLAMAK", taboo: ["Yaş", "Göz", "Üzülmek", "Akmak", "Yapmak"] },
+{ word: "KAPARO", taboo: ["Küçük", "Ödeme", "Para", "Anlaşma", "Vermek"] },
+{ word: "KORT", taboo: ["Ağ", "Alan", "Tenis", "Saha", "Spor"] },
+{ word: "SÜZME YOĞURT", taboo: ["Peynir", "Su", "Süt", "Katı", "Yemek"] },
+{ word: "EVLENME TEKLİFİ", taboo: ["Düğün", "Karı-Koca", "Nikah", "Yüzük", "Etmek"] },
+{ word: "BOTOKS", taboo: ["Estetik", "Yaşlanmak", "Yüz", "Kırışık", "Yaptırmak"] },
+{ word: "NOEL", taboo: ["Yılbaşı", "Hediye", "Ağaç", "25 Aralık", "Kış"] },
+{ word: "KARDAN ADAM", taboo: ["Kar", "Soğuk", "Havuç", "Beyaz", "Kış"] },     
+{ word: "HEDİYE", taboo: ["Paket", "Sürpriz", "Almak", "Vermek", "Noel"] },
+{ word: "YILBAŞI", taboo: ["31", "Ocak", "Kutlama", "Saat", "Gece"] },
+{ word: "PETROL", taboo: ["Ajda Pekkan", "yakıt", "benzin", "otomobil", "sıvı"] },
+{ word: "TOPAÇ", taboo: ["oynamak", "eski", "çevirmek", "dönmek", "çocuk"] },
+{ word: "BAĞLILIK", taboo: ["sadakat", "sevgi", "göstermek", "saygı", "ilgi"] },
+{ word: "SÜT", taboo: ["inek", "sıvı", "beyaz", "yavru", "memeli"] },
+{ word: "HEDEF", taboo: ["amaç", "nişangah", "tahta", "gaye", "kitle"] },
+{ word: "AVANTA", taboo: ["ödeme", "emek", "bedel", "kazanç", "almak"] },
+{ word: "NAKIŞ", taboo: ["işlemek", "iğne", "dikiş", "iş", "ip"] },
+{ word: "KEHANET", taboo: ["his", "bilme", "kahin", "tahmin", "sezgi"] },
+{ word: "PROFESÖR", taboo: ["doçent", "üniversite", "öğretmen", "doktor", "hoca"] },
+{ word: "ANONİM", taboo: ["bilinmeyen", "isimsiz", "edebiyat", "şiir", "belirsiz"] },
+{ word: "NAFAKA", taboo: ["aylık", "para", "geçim", "boşanmak", "ayrılmak"] },
+{ word: "AT KUYRUĞU", taboo: ["uzun", "saç", "toplamak", "toka", "baş"] },
+{ word: "NİLÜFER", taboo: ["Kayahan", "göl", "dere", "çiçek", "kurbağa"] },
+{ word: "FIFA", taboo: ["futbol", "spor", "dernek", "kurum", "denetleme"] },
+{ word: "İTİBAR", taboo: ["saygı", "görmek", "prestij", "değer", "göstermek"] },
+{ word: "KARA DELİK", taboo: ["çekim", "uzay", "sonsuzluk", "siyah", "derin"] },
+{ word: "MAKUL", taboo: ["elverişli", "uygun", "mantıklı", "akıllıca", "belirli"] },
+{ word: "ESANS", taboo: ["deodorant", "parfüm", "güzel", "koku", "şişe"] },
+{ word: "DANS", taboo: ["etmek", "müzik", "oynamak", "sahne", "hareket"] },
+{ word: "TİRBUŞON", taboo: ["şişe", "şarap", "alet", "mantar", "açmak"] },
+{ word: "PASAPORT", taboo: ["yeşil", "bordo", "yurtdışı", "kimlik", "belge"] },
+{ word: "RUMUZ", taboo: ["bilgisayar", "internet", "takma ad", "şiir", "web"] },
+{ word: "MÜTEMADİYEN", taboo: ["devamlı", "sıklıkla", "aralık", "zaman", "nadiren"] },
+{ word: "KREM", taboo: ["ilaç", "vücut", "el", "kozmetik", "bakım"] },
+{ word: "BARBEKÜ", taboo: ["köfte", "bahçe", "mangal", "ateş", "kebap"] },
+{ word: "SÜTLAÇ", taboo: ["beyaz", "pirinç", "yemek", "tarçın", "lezzetli"] },
+{ word: "ŞİMŞEK", taboo: ["çakmak", "gök gürültüsü", "yıldırım", "elektrik", "bulut"] },
+{ word: "ROKET", taboo: ["atmak", "fırlatmak", "ateş", "füze", "mermi"] },
+{ word: "OMURİLİK SOĞANI", taboo: ["kontrol", "beyincik", "sinir", "organ", "istemsiz"] },
+{ word: "İSKONTO", taboo: ["eksik", "indirim", "az", "tenzilat", "senet"] },
+{ word: "FERİBOT", taboo: ["transport", "ulaşım", "araç", "deniz", "nakil"] },
+{ word: "TANGO", taboo: ["arjantin", "ispanyol", "dans", "latin", "Al Pacino"] },
+{ word: "ÇANTA", taboo: ["taşımak", "cüzdan", "kadın", "eşya", "takmak"] },
+{ word: "KUMANDA", taboo: ["tv", "uzaktan", "kontrol", "etmek", "kanal"] },
+{ word: "GÖZLÜK", taboo: ["görmek", "takmak", "göz", "çerçeve", "güneş"] },
+{ word: "KAAN TANGÖZE", taboo: ["Duman", "solist", "şarkıcı", "gitarist", "sahne"] },
+{ word: "VANTİLATÖR", taboo: ["rüzgar", "pervane", "yaz", "sıcak", "yapmak"] },
+{ word: "KARİDES", taboo: ["güveç", "deniz", "balık", "böcek", "yemek"] },
+{ word: "PALET", taboo: ["resim", "balık", "ayak", "deniz", "dalgıç"] },
+{ word: "GEVREK", taboo: ["mısır", "simit", "çikolata", "izmir", "çıtır"] },
+{ word: "VERGİ", taboo: ["Tayyip", "devlet", "vermek", "kdv", "para"] },
+{ word: "PEÇE", taboo: ["örtü", "kapatmak", "siyah", "kadın", "örtmek"] },
+{ word: "YAZICI", taboo: ["kartuş", "renkli", "çıktı", "bilgisayar", "lazer"] },
+{ word: "KİREÇ", taboo: ["oda", "duvar", "boya", "badana", "çamaşır makinesi"] },
+{ word: "POTASYUM", taboo: ["alkali", "kalsiyum", "fosfor", "metal", "kimya"] },
+{ word: "HÖYÜK", taboo: ["tepe", "tarihi", "kalıntı", "mezar", "çukur"] },
+{ word: "ÇÖP ADAM", taboo: ["hikaye", "süpürge", "kahraman", "zayıf", "pis"] },
+{ word: "KOLYE", taboo: ["zincir", "boncuk", "bijuteri", "kuyumcu", "süs"] },
+{ word: "ŞEKERLEME", taboo: ["şeker", "bonbon", "tatlı", "uyuyakalmak"] },
+{ word: "MÜTEHEYYİÇ", taboo: ["duygu", "heyecanlı", "gaza gelmek", "coşkun", "pırpırık"] },
+{ word: "LİDER", taboo: ["yönetici", "patron", "direktör", "koordinator", "organizatör"] },
+{ word: "YOL VERMEK", taboo: ["sollamak", "hız", "izin", "geçmek", "gitmek"] },
+{ word: "İKTİDAR", taboo: ["kuvvet", "otorite", "yetki", "muhalefet", "parti"] },
+{ word: "KOLONİ", taboo: ["göçmen", "ülke", "ingiltere", "topluluk", "tarih"] },
+{ word: "AMY WINEHOUSE", taboo: ["ölmek", "ingiliz", "Back to Black", "şarkıcı", "ünlü"] }
+];
+
+    let currentTeam = 'A';
+    let scoreA = 0;
+    let scoreB = 0;
+    let timeLeft = 60;
+    let timer = null;
+    let passUsed = 0;
+
+    const wordEl = document.getElementById('word');
+    const tabooListEl = document.getElementById('tabooList');
+    const timeEl = document.getElementById('time');
+    const passCountEl = document.getElementById('passCount');
+
+    const startBtn = document.getElementById('startBtn');
+    const correctBtn = document.getElementById('correctBtn');
+    const tabooBtn = document.getElementById('tabooBtn');
+    const passBtn = document.getElementById('passBtn');
+    const switchBtn = document.getElementById('switchBtn');
+
+    function showRandomWord() {
+      const item = words[Math.floor(Math.random() * words.length)];
+      wordEl.textContent = item.word;
+      tabooListEl.innerHTML = '';
+      item.taboo.forEach(t => {
+        const li = document.createElement('li');
+        li.textContent = '❌ ' + t;
+        tabooListEl.appendChild(li);
+      });
+    }
+
+    function startRound() {
+      clearInterval(timer);
+      timeLeft = 60;
+      passUsed = 0;
+      passCountEl.textContent = passUsed;
+      timeEl.textContent = timeLeft;
+      showRandomWord();
+
+      timer = setInterval(() => {
+        timeLeft--;
+        timeEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          alert('⏰ Süre doldu kral');
+        }
+      }, 1000);
+    }
+
+    function addPoint(value) {
+      if (currentTeam === 'A') {
+        scoreA += value;
+        document.getElementById('scoreA').textContent = scoreA;
+      } else {
+        scoreB += value;
+        document.getElementById('scoreB').textContent = scoreB;
+      }
+      showRandomWord();
+    }
+
+    startBtn.addEventListener('click', startRound);
+
+    correctBtn.addEventListener('click', () => addPoint(1));
+
+    tabooBtn.addEventListener('click', () => addPoint(-1));
+
+    passBtn.addEventListener('click', () => {
+      if (passUsed >= 3) {
+        alert('❌ Bu raundda en fazla 3 pas kullanabilirsin dostum sakinleş!');
+        return;
+      }
+      passUsed++;
+      passCountEl.textContent = passUsed;
+      showRandomWord();
+    });
+
+    switchBtn.addEventListener('click', () => {
+      currentTeam = currentTeam === 'A' ? 'B' : 'A';
+      passUsed = 0;
+      passCountEl.textContent = passUsed;
+      alert('Şimdi Takım ' + currentTeam + ' oynuyor!');
+    });
+  </script>
+</body>
+</html>
